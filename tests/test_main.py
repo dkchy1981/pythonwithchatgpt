@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import _TOKENS, app
 
 
 client = TestClient(app)
@@ -16,6 +16,12 @@ def test_login_success():
 
 def test_login_invalid_credentials():
     response = client.post("/login", json={"username": "admin", "password": "wrong"})
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Invalid credentials"}
+
+
+def test_login_unknown_user():
+    response = client.post("/login", json={"username": "unknown", "password": "admin123"})
     assert response.status_code == 401
     assert response.json() == {"detail": "Invalid credentials"}
 
@@ -36,6 +42,20 @@ def test_userdetails_invalid_token_value():
     response = client.get("/userdetails", headers={"Authorization": "Bearer wrong-token"})
     assert response.status_code == 401
     assert response.json() == {"detail": "Invalid token"}
+
+
+def test_userdetails_bearer_without_token_value():
+    response = client.get("/userdetails", headers={"Authorization": "Bearer"})
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Invalid token"}
+
+
+def test_userdetails_expired_token():
+    _TOKENS["expired-token"] = {"username": "admin", "expires_at": 0}
+    response = client.get("/userdetails", headers={"Authorization": "Bearer expired-token"})
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Invalid token"}
+    assert "expired-token" not in _TOKENS
 
 
 def test_userdetails_success():
