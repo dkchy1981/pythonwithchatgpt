@@ -9,7 +9,7 @@ from pydantic import BaseModel
 app = FastAPI(title="User Details API")
 
 _PBKDF2_ROUNDS = 200_000
-_TOKEN_TTL_SECONDS = 3600
+_TOKEN_TTL_SECONDS = int(os.getenv("TOKEN_TTL_SECONDS", "3600"))
 
 
 def _build_default_users():
