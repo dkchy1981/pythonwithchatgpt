@@ -40,4 +40,4 @@ jobs:
           - Use relative links for all internal documentation references.
           EOF
           )" \
-            --assignee "github-copilot[bot]"
+            --assignee "Copilot"
