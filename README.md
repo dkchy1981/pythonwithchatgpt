@@ -1,6 +1,6 @@
 # pythonwithchatgpt
 
-[![Python](https://img.shields.io/badge/python-3.x-green)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-supported-green)](https://www.python.org/)
 [![Last Commit](https://img.shields.io/github/last-commit/dkchy1981/pythonwithchatgpt)](https://github.com/dkchy1981/pythonwithchatgpt/commits)
 
 A lightweight repository for learning and experimenting with Python using ChatGPT-assisted workflows.
@@ -42,4 +42,4 @@ Contributions are welcome.
 2. Make focused changes with clear commit messages.
 3. Open a pull request with a short summary and rationale.
 
-For README improvements, keep internal references relative (for example, `./README.md`).
+For README improvements, keep internal references relative (for example, section anchors like `#usage`).
