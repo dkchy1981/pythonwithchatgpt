@@ -1,4 +1,5 @@
 import hashlib
+import os
 import secrets
 import time
 
@@ -9,19 +10,27 @@ app = FastAPI(title="User Details API")
 
 _PBKDF2_ROUNDS = 200_000
 _TOKEN_TTL_SECONDS = 3600
-_ADMIN_SALT = b"pythonwithchatgpt-admin-salt"
-_USERS = {
-    "admin": {
-        "password_salt": _ADMIN_SALT.hex(),
-        "password_hash": hashlib.pbkdf2_hmac(
-            "sha256",
-            b"admin123",
-            _ADMIN_SALT,
-            _PBKDF2_ROUNDS,
-        ).hex(),
-        "details": {"username": "admin", "email": "admin@example.com"},
+
+
+def _build_default_users():
+    username = os.getenv("API_USERNAME", "admin")
+    password = os.getenv("API_PASSWORD", "admin123")
+    salt = os.urandom(16)
+    return {
+        username: {
+            "password_salt": salt.hex(),
+            "password_hash": hashlib.pbkdf2_hmac(
+                "sha256",
+                password.encode(),
+                salt,
+                _PBKDF2_ROUNDS,
+            ).hex(),
+            "details": {"username": username, "email": f"{username}@example.com"},
+        }
     }
-}
+
+
+_USERS = _build_default_users()
 _TOKENS: dict[str, dict[str, str | float]] = {}
 
 

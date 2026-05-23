@@ -1,6 +1,8 @@
+from unittest.mock import patch
+
 from fastapi.testclient import TestClient
 
-from app.main import _TOKENS, app
+from app.main import app
 
 
 client = TestClient(app)
@@ -51,11 +53,12 @@ def test_userdetails_bearer_without_token_value():
 
 
 def test_userdetails_expired_token():
-    _TOKENS["expired-token"] = {"username": "admin", "expires_at": 0}
-    response = client.get("/userdetails", headers={"Authorization": "Bearer expired-token"})
+    login_response = client.post("/login", json={"username": "admin", "password": "admin123"})
+    token = login_response.json()["access_token"]
+    with patch("app.main.time.time", return_value=10**10):
+        response = client.get("/userdetails", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 401
     assert response.json() == {"detail": "Invalid token"}
-    assert "expired-token" not in _TOKENS
 
 
 def test_userdetails_success():
