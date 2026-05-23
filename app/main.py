@@ -73,4 +73,9 @@ def userdetails(authorization: str | None = Header(default=None)):
         _TOKENS.pop(token, None)
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    return _USERS[session["username"]]["details"]
+    user = _USERS.get(session["username"])
+    if not user:
+        _TOKENS.pop(token, None)
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    return user["details"]
