@@ -1,0 +1,43 @@
+name: Update README on push
+
+# Trigger the Copilot coding agent to review and update README.md
+# after every push to the default branch.
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  trigger-readme-agent:
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Required to create issues that invoke the Copilot coding agent
+      issues: write
+
+    steps:
+      - name: Open Copilot task to update README
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "docs: update README after push to ${GITHUB_REF_NAME} (${GITHUB_SHA::7})" \
+            --body "$(cat <<'EOF'
+          A new commit was pushed to **${GITHUB_REF_NAME}** (commit \`${GITHUB_SHA::7}\`).
+
+          Please act as a documentation specialist and update \`README.md\` to reflect any relevant changes:
+
+          - Review the recent changes in the repository.
+          - Keep the project description accurate and up to date.
+          - Ensure these sections are present and well-structured:
+            - **Overview** – what the project does
+            - **Installation** – how to set it up
+            - **Usage** – how to run or use it
+            - **Contributing** – how to contribute
+          - Add or refresh badges and navigation links.
+          - Use relative links for all internal documentation references.
+          EOF
+          )" \
+            --assignee "github-copilot[bot]"
