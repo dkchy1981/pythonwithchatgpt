@@ -1,3 +1,6 @@
+import hashlib
+import secrets
+
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 
@@ -5,11 +8,11 @@ app = FastAPI(title="User Details API")
 
 _USERS = {
     "admin": {
-        "password": "admin123",
+        "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
         "details": {"username": "admin", "email": "admin@example.com"},
     }
 }
-_TOKEN = "basic-token"
+_TOKENS: dict[str, str] = {}
 
 
 class LoginRequest(BaseModel):
@@ -20,9 +23,12 @@ class LoginRequest(BaseModel):
 @app.post("/login")
 def login(payload: LoginRequest):
     user = _USERS.get(payload.username)
-    if not user or user["password"] != payload.password:
+    payload_hash = hashlib.sha256(payload.password.encode()).hexdigest()
+    if not user or user["password_hash"] != payload_hash:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    return {"access_token": _TOKEN, "token_type": "bearer"}
+    token = secrets.token_urlsafe(24)
+    _TOKENS[token] = payload.username
+    return {"access_token": token, "token_type": "bearer"}
 
 
 @app.get("/userdetails")
@@ -31,7 +37,8 @@ def userdetails(authorization: str | None = Header(default=None)):
         raise HTTPException(status_code=401, detail="Authorization header missing")
 
     scheme, _, token = authorization.partition(" ")
-    if scheme.lower() != "bearer" or token != _TOKEN:
+    username = _TOKENS.get(token) if scheme.lower() == "bearer" else None
+    if not username:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    return _USERS["admin"]["details"]
+    return _USERS[username]["details"]

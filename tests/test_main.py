@@ -9,7 +9,9 @@ client = TestClient(app)
 def test_login_success():
     response = client.post("/login", json={"username": "admin", "password": "admin123"})
     assert response.status_code == 200
-    assert response.json() == {"access_token": "basic-token", "token_type": "bearer"}
+    body = response.json()
+    assert body["token_type"] == "bearer"
+    assert body["access_token"]
 
 
 def test_login_invalid_credentials():
@@ -37,7 +39,9 @@ def test_userdetails_invalid_token_value():
 
 
 def test_userdetails_success():
-    response = client.get("/userdetails", headers={"Authorization": "Bearer basic-token"})
+    login_response = client.post("/login", json={"username": "admin", "password": "admin123"})
+    token = login_response.json()["access_token"]
+    response = client.get("/userdetails", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
     assert response.json() == {"username": "admin", "email": "admin@example.com"}
 
