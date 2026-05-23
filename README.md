@@ -1,6 +1,5 @@
 # pythonwithchatgpt
 
-[![Docs](https://img.shields.io/badge/docs-README-blue)](./README.md)
 [![Python](https://img.shields.io/badge/python-3.x-green)](https://www.python.org/)
 [![Last Commit](https://img.shields.io/github/last-commit/dkchy1981/pythonwithchatgpt)](https://github.com/dkchy1981/pythonwithchatgpt/commits)
 
