@@ -17,9 +17,29 @@ jobs:
       issues: write
 
     steps:
+      - name: Validate PAT secret is configured
+        run: |
+          if [ -z "$GH_PAT" ]; then
+            echo "::error::The 'PAT' repository secret is not configured."
+            echo "::error::A Personal Access Token (PAT) with 'repo' scope is required to assign"
+            echo "::error::the Copilot coding agent to issues. GITHUB_TOKEN cannot be used for this."
+            echo "::error::Create a PAT at https://github.com/settings/tokens and store it as a"
+            echo "::error::repository secret named 'PAT' (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+        env:
+          GH_PAT: ${{ secrets.PAT }}
+
       - name: Open Copilot task to update README
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # A Personal Access Token (PAT) is required to assign the Copilot
+          # coding agent to an issue. GitHub App installation tokens
+          # (GITHUB_TOKEN) do not support agent assignment.
+          # The PAT must belong to a user with write access to this repository.
+          # Use a fine-grained PAT (Issues: read/write) or a classic PAT with
+          # 'repo' scope. Rotate the PAT regularly and store it as a
+          # repository secret named 'PAT'.
+          GH_TOKEN: ${{ secrets.PAT }}
         run: |
           gh issue create \
             --repo "$GITHUB_REPOSITORY" \
