@@ -60,4 +60,4 @@ jobs:
           - Use relative links for all internal documentation references.
           EOF
           )" \
-            --assignee "Copilot"
+            --assignee "copilot-swe-agent"
