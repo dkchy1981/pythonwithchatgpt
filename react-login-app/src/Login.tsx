@@ -35,7 +35,7 @@ export default function Login({ onLogin }: LoginProps) {
       await new Promise((r) => setTimeout(r, 600));
       onLogin(normalizedUsername);
     } catch (error) {
-      console.error('Sign in failed.', error);
+      console.error('Unexpected error during sign in attempt.', error);
       setError('Unable to sign in right now. Please try again.');
     } finally {
       submitInFlightRef.current = false;
