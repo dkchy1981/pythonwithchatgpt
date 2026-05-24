@@ -34,7 +34,8 @@ export default function Login({ onLogin }: LoginProps) {
       // Simulate an async login call. Replace with a real API call.
       await new Promise((r) => setTimeout(r, 600));
       onLogin(normalizedUsername);
-    } catch {
+    } catch (error) {
+      console.error('Sign in failed.', error);
       setError('Unable to sign in right now. Please try again.');
     } finally {
       submitInFlightRef.current = false;
@@ -46,7 +47,9 @@ export default function Login({ onLogin }: LoginProps) {
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit} noValidate>
         <h1 className="login-title">Sign In</h1>
-        <p className="login-subtitle">Welcome back! Please enter your details.</p>
+        <p className="login-subtitle">
+          Welcome back! Demo mode signs you in locally with any non-empty credentials.
+        </p>
 
         <label className="login-label" htmlFor="username">
           Username
@@ -89,6 +92,8 @@ export default function Login({ onLogin }: LoginProps) {
         <button type="submit" className="login-button" disabled={loading}>
           {loading ? 'Signing in…' : 'Sign In'}
         </button>
+
+        <p className="login-hint">Your username is trimmed before sign-in.</p>
       </form>
     </div>
   );
