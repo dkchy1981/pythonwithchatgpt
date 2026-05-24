@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import './Login.css';
 
 type LoginProps = {
@@ -11,26 +11,35 @@ export default function Login({ onLogin }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const submitInFlightRef = useRef(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
+    if (submitInFlightRef.current) {
+      return;
+    }
 
-    if (!username.trim() || !password) {
+    setError(null);
+    const normalizedUsername = username.trim();
+
+    if (!normalizedUsername || !password) {
       setError('Please enter both username and password.');
       return;
     }
 
+    submitInFlightRef.current = true;
     setLoading(true);
-    // Simulate an async login call. Replace with a real API call.
-    await new Promise((r) => setTimeout(r, 600));
-    setLoading(false);
 
-    // Demo credentials: admin / password123
-    if (username === 'admin' && password === 'password123') {
-      onLogin(username);
-    } else {
-      setError('Invalid username or password.');
+    try {
+      // Simulate an async login call. Replace with a real API call.
+      await new Promise((r) => setTimeout(r, 600));
+      onLogin(normalizedUsername);
+    } catch (error) {
+      console.error('Unexpected error during sign in attempt.', error);
+      setError('Unable to sign in right now. Please try again.');
+    } finally {
+      submitInFlightRef.current = false;
+      setLoading(false);
     }
   };
 
@@ -38,7 +47,9 @@ export default function Login({ onLogin }: LoginProps) {
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit} noValidate>
         <h1 className="login-title">Sign In</h1>
-        <p className="login-subtitle">Welcome back! Please enter your details.</p>
+        <p className="login-subtitle">
+          Welcome back! Demo mode signs you in locally with any non-empty credentials.
+        </p>
 
         <label className="login-label" htmlFor="username">
           Username
@@ -82,9 +93,7 @@ export default function Login({ onLogin }: LoginProps) {
           {loading ? 'Signing in…' : 'Sign In'}
         </button>
 
-        <p className="login-hint">
-          Try <code>admin</code> / <code>password123</code>
-        </p>
+        <p className="login-hint">Your username is trimmed before sign-in.</p>
       </form>
     </div>
   );
